@@ -8,39 +8,31 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
+      - uses: actions/checkout@v3
       - name: Set Up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       - name: Install Dependencies
-        run: npm install
+        run: npm install --prefer-offline
 
-      - name: Run Lint, Format and Tests
-        run: |
-          npm run lint
-          npm run format
-          npm test
+      - name: Run Lint, Format, and Tests
+        run: npm run lint && npm run format && npm test
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set Up Kubectl
-        uses: azure/k8s-set-context@v1
+        uses: azure/k8s-set-context@v2
         with:
           kubeconfig: ${{ secrets.KUBECONFIG }}
           context: ${{ secrets.KUBE_CONTEXT }}
 
       - name: Deploy to Kubernetes
-        run: |
-          kubectl apply -f k8s-deployment.yaml
+        run: kubectl apply -f k8s-deployment.yaml
